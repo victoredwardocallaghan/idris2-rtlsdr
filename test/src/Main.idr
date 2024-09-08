@@ -70,10 +70,10 @@ writeBufToFile bytes = do
   for_ (zip [0 .. len-1] bytes) $ \(i, byte) =>
     setBits8 buf i byte
 
-  result <- withFile {io=IO} "data.wav" Append printLn $ \f => do
-    Right () <- writeBufferData {io=IO} f buf 0 len
+  result <- withFile "data.wav" Append printLn $ \f => do
+    Right () <- writeBufferData f buf 0 len
       | Left (err, len) => do
-          printLn {io=IO} ("could not writeBufferData", err, len)
+          printLn ("could not writeBufferData", err, len)
           pure $ Left ()
 
     pure $ Right ()
