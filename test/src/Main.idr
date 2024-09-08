@@ -2,6 +2,7 @@ module Main
 
 import Bindings.RtlSdr
 import Data.Bits
+import Data.Buffer
 import Data.List
 import System.FFI
 import System.File
@@ -56,23 +57,18 @@ unIQ (i :: q :: rest) =
   let (hi, lo) = abs i q
     in lo :: hi :: unIQ rest
 
-demodAM : String -> String
-demodAM s = do
-  let v : List Int = map ord (unpack s)
-  let demod : List Int = reverse $ map cast $ unIQ (map cast v)
-  pack $ map chr demod
+demodAM : List Bits8 -> List Bits8
+demodAM = unIQ
 
-writeBufToFile : String -> Int -> IO ()
-writeBufToFile b l = do
-  r <- appendFile "data.wav" b
+writeBufToFile : List Bits8 -> IO ()
+writeBufToFile buf = do
+  r <- appendFile "data.wav" (show buf)
   case r of
        Left  e => printLn e
-       Right _ => putStrLn $ "written buffer length = " ++ (show l)
+       Right _ => putStrLn $ "written buffer length = " ++ (show (length buf))
 
-readasync_cb : String -> Int -> AnyPtr -> PrimIO ()
-readasync_cb buf len ctx = toPrim $ do
-  let de = demodAM buf
-  writeBufToFile de (cast $ length de) -- len
+readAsyncCallback : AnyPtr -> List Bits8 -> IO ()
+readAsyncCallback ctx buf = writeBufToFile (demodAM buf)
 
 testAM : IO ()
 testAM = do
@@ -109,7 +105,7 @@ testAM = do
       -- flush buffer
       _ <- resetBuffer h
 
-      _ <- readAsync h readasync_cb prim__getNullAnyPtr 0 0
+      _ <- readAsync h readAsyncCallback prim__getNullAnyPtr 0 0
 
       _ <- rtlsdr_close h
       putStrLn "Done, closing.."

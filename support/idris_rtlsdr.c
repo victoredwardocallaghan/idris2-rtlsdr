@@ -16,3 +16,7 @@ int idris_rtlsdr_read_refint(const int *p)
 	return *p;
 }
 
+uint8_t idris_rtlsdr_ref(uint8_t *ptr, int ofs)
+{
+	return ptr[ofs];
+}

@@ -13,6 +13,7 @@ import System.FFI
 
 
 -- wrapper C func helper.
+public export
 idris_rtlsdr : String -> String
 idris_rtlsdr fn = "C:" ++ "idris_rtlsdr_" ++ fn ++ ",rtlsdr-idris"
 
