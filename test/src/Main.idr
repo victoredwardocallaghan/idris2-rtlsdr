@@ -6,6 +6,7 @@ import Data.Buffer
 import Data.List
 import System.FFI
 import System.File
+import System.File.Buffer
 
 testOpenClose : IO ()
 testOpenClose = do
@@ -61,11 +62,25 @@ demodAM : List Bits8 -> List Bits8
 demodAM = unIQ
 
 writeBufToFile : List Bits8 -> IO ()
-writeBufToFile buf = do
-  r <- appendFile "data.wav" (show buf)
-  case r of
-       Left  e => printLn e
-       Right _ => putStrLn $ "written buffer length = " ++ (show (length buf))
+writeBufToFile bytes = do
+  let len : Int = cast (length bytes)
+  Just buf <- newBuffer len
+    | Nothing => putStrLn "could not allocate buffer"
+
+  for_ (zip [0 .. len-1] bytes) $ \(i, byte) =>
+    setBits8 buf i byte
+
+  result <- withFile {io=IO} "data.wav" Append printLn $ \f => do
+    Right () <- writeBufferData {io=IO} f buf 0 len
+      | Left (err, len) => do
+          printLn {io=IO} ("could not writeBufferData", err, len)
+          pure $ Left ()
+
+    pure $ Right ()
+
+  case result of
+    Left err => printLn err
+    Right () => pure ()
 
 readAsyncCallback : AnyPtr -> List Bits8 -> IO ()
 readAsyncCallback ctx buf = writeBufToFile (demodAM buf)
