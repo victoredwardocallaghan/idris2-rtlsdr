@@ -26,37 +26,25 @@ testOpenClose = do
       _ <- rtlsdr_close h
       putStrLn "Done, closing.."
 
-abs : (i, q : Bits8) -> (Bits8, Bits8)
-abs i q =
+abs : (i8, q8 : Bits8) -> Bits8
+abs i8 q8 =
   let
-    ii : Double -- Bits32
-    ii = cast i * cast i
+    i : Double
+    i = (cast i8 - 128) / 128
 
-    qq : Double -- Bits32
-    qq = cast q * cast q
+    q : Double
+    q = (cast q8 - 128) / 128
 
-    iiqq' : Double -- Bits32
-    iiqq' = sqrt ( ii + qq )
-
-    -- clamp to 16bit word size.
-    iiqq : Bits16
-    iiqq = if iiqq' > 32768 then 32768 else (cast iiqq')
-
-    -- encode U8 wav
-    iiqqLo : Bits8
-    iiqqLo = cast iiqq
-
-    iiqqHi : Bits8
-    iiqqHi = cast (iiqq `shiftR` 8)
+    amp : Double
+    amp = sqrt (i*i + q*q)
   in
-    (iiqqHi, iiqqLo)
+    -- format: U8
+    cast (amp * 255 * 16)
 
 unIQ : List Bits8 -> List Bits8
 unIQ [] = []
 unIQ [_] = []
-unIQ (i :: q :: rest) =
-  let (hi, lo) = abs i q
-    in lo :: hi :: unIQ rest
+unIQ (i :: q :: rest) = abs i q :: unIQ rest
 
 demodAM : List Bits8 -> List Bits8
 demodAM = unIQ
@@ -70,7 +58,7 @@ writeBufToFile bytes = do
   for_ (zip [0 .. len-1] bytes) $ \(i, byte) =>
     setBits8 buf i byte
 
-  result <- withFile "data.wav" Append printLn $ \f => do
+  result <- withFile "data.u8" Append printLn $ \f => do
     Right () <- writeBufferData f buf 0 len
       | Left (err, len) => do
           printLn ("could not writeBufferData", err, len)
@@ -92,7 +80,8 @@ testAM = do
   case h of
     Nothing => putStrLn "Failed to open device handle"
     Just h => do
-      let fq = 476_425_000 -- UHF chan1 -- 133_250_000 -- YBTH AWIS
+      -- let fq = 476_425_000 -- UHF chan1 -- 133_250_000 -- YBTH AWIS
+      let fq = 106_800_000
 
       _ <- setTunerGainMode h False
       _ <- setAGCMode h True -- ON
