@@ -13,7 +13,10 @@ void demodulate(FILE *f, const uint8_t *buf, int n_read)
 		double i = (((double) buf[j]) - 127) / 127;
 		double q = (((double) buf[j+1]) - 127) / 127;
 		double amp = sqrt(i*i + q*q);
-		fputc((uint8_t) (amp * 255), f);
+
+		// poor man's downsampling from ~250 kHz to ~50 kHz
+		if (j%5 == 0)
+			fputc((uint8_t) (amp * 255), f);
 	}
 }
 
