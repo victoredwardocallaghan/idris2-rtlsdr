@@ -8,24 +8,6 @@ import System.FFI
 import System.File
 import System.File.Buffer
 
-testOpenClose : IO ()
-testOpenClose = do
-  putStrLn "opening RTL SDR idx 0"
-  h <- rtlsdr_open 0
-  case h of
-    Nothing => putStrLn "Failed to open device handle"
-    Just h => do
-      putStrLn $ show $ getTunerType h
-      o <- getOffsetTuning h
-      putStrLn $ "Tuner offset: " ++ (show o)
-      g <- getTunerGain h
-      putStrLn $ "Gain: " ++ (show g)
-      f <- getCenterFreq h
-      putStrLn $ "Freq: " ++ (show f)
-
-      _ <- rtlsdr_close h
-      putStrLn "Done, closing.."
-
 abs : (i8, q8 : Bits8) -> Bits8
 abs i8 q8 =
   let
@@ -83,11 +65,12 @@ testAM = do
       -- let fq = 476_425_000 -- UHF chan1 -- 133_250_000 -- YBTH AWIS
       let fq = 106_800_000
 
-      _ <- setTunerGainMode h False
+      _ <- setTunerGainMode h True -- manual gain
+      _ <- setTunerGain h 192 -- 19.2dB
+
       _ <- setAGCMode h True -- ON
       _ <- setCenterFreq h fq
       _ <- setTunerBandwidth h 0 -- auto
-      _ <- setTunerGain h 182
       -- _ <- setDirectSampling h (SAMPLING_I_ADC_ENABLED | SAMPLING_Q_ADC_ENABLED)
       _ <- setSampleRate h 250_000
 
@@ -97,10 +80,14 @@ testAM = do
       fc <- getFreqCorrection h
       putStrLn $ "Freq correction set to: " ++ (show fc)
 
+      gs <- getTunerGains h
+      putStrLn $ "Gains: " ++ (show gs)
       g <- getTunerGain h
       putStrLn $ "Gain: " ++ (show g)
       f <- getCenterFreq h
       putStrLn $ "Freq: " ++ (show f)
+      o <- getOffsetTuning h
+      putStrLn $ "Tuner offset: " ++ (show o)
       s <- getDirectSampling h
       putStrLn $ "Sampling mode: " ++ (show s)
       r <- getSampleRate h
@@ -124,5 +111,4 @@ testDeviceFound = do
 main : IO ()
 main = do
   testDeviceFound
-  testOpenClose
   testAM

@@ -27,7 +27,3 @@ read_async: Ptr RtlSdrHandle -> ReadAsyncFnPrim -> AnyPtr -> Int -> Int -> PrimI
 export
 %foreign (librtlsdr "cancel_async")
 cancel_async: Ptr RtlSdrHandle -> PrimIO Int
-
-export
-%foreign (idris_rtlsdr "ref")
-ptr_ref : AnyPtr -> Int -> PrimIO Bits8

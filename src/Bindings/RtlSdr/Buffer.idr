@@ -3,6 +3,7 @@ module Bindings.RtlSdr.Buffer
 import public Bindings.RtlSdr.Raw.Buffer
 import Bindings.RtlSdr.Device
 import Bindings.RtlSdr.Error
+import Bindings.RtlSdr.Raw.Support
 
 import System.FFI
 
@@ -19,7 +20,7 @@ readSync : Ptr RtlSdrHandle -> AnyPtr -> Int -> IO (Either RTLSDR_ERROR Int)
 readSync h b l = do
   v <- prim__castPtr <$> malloc 4 -- n_read
   r <- fromPrim $ read_sync h b l v
-  let nr = idris_rtlsdr_read_refint v
+  let nr = peekInt v
   free $ prim__forgetPtr v
   io_pure $ if r == 0 then Right nr else Left RtlSdrError
 
@@ -31,7 +32,7 @@ private
 readBuf : AnyPtr -> Int -> IO (List Bits8)
 readBuf buf len =
   for [0..len-1] $ \ofs =>
-    fromPrim $ ptr_ref buf ofs
+    fromPrim $ peekBits8 buf ofs
 
 export
 readAsync : Ptr RtlSdrHandle -> ReadAsyncFn -> AnyPtr -> Int -> Int -> IO (Either RTLSDR_ERROR ())

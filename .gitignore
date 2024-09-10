@@ -5,3 +5,5 @@ lib/
 *.o
 *.a
 *.so
+*.wav
+*.bin

@@ -3,19 +3,24 @@ module Bindings.RtlSdr.Gain
 import Bindings.RtlSdr.Device
 import Bindings.RtlSdr.Error
 import Bindings.RtlSdr.Raw.Gain
+import Bindings.RtlSdr.Raw.Support
 
 import System.FFI
 
 %default total
 
 export
-getTunerGains : Ptr RtlSdrHandle -> IO (Either RTLSDR_ERROR Int)
+getTunerGains : Ptr RtlSdrHandle -> IO (Either RTLSDR_ERROR (List Int))
 getTunerGains h = do
-  v <- prim__castPtr <$> malloc 4 -- gains
-  r <- fromPrim $ get_tuner_gains h v
-  let g = idris_rtlsdr_read_refint v
-  free $ prim__forgetPtr v
-  io_pure $ if r == 0 then Right g else Left RtlSdrError
+  n <- fromPrim $ get_tuner_gains h (prim__castPtr prim__getNullAnyPtr)
+  if n < 0 then do
+             io_pure $ Left RtlSdrError
+           else do
+             v <- prim__castPtr <$> malloc n
+             _ <- fromPrim $ get_tuner_gains h v
+             g <- readBufPtr v n
+             free $ prim__forgetPtr v
+             io_pure $ Right g
 
 export
 setTunerGain : Ptr RtlSdrHandle -> Int -> IO (Either RTLSDR_ERROR ())

@@ -14,6 +14,13 @@ public export
 librtlsdr : String -> String
 librtlsdr fn = "C:" ++ "rtlsdr_" ++ fn ++ ",librtlsdr"
 
+--RTLSDR_API int rtlsdr_get_device_usb_strings(uint32_t index,
+--					     char *manufact,
+--					     char *product,
+--					     char *serial);
+export
+%foreign (librtlsdr "get_device_usb_strings")
+get_device_usb_strings: Int -> Ptr String -> Ptr String -> Ptr String -> Int
 
 -- RTLSDR_API uint32_t rtlsdr_get_device_count(void);
 export

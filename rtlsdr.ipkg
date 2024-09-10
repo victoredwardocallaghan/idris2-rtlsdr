@@ -30,6 +30,7 @@ modules = Bindings.RtlSdr
 	, Bindings.RtlSdr.Raw.Frequency
 	, Bindings.RtlSdr.Raw.Gain
 	, Bindings.RtlSdr.Raw.Sampling
+	, Bindings.RtlSdr.Raw.Support
 	, Bindings.RtlSdr.Raw.Misc
 
 -- opts = "-p effects"
