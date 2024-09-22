@@ -43,7 +43,7 @@ downSample chunkLen xs with (splitAt (cast chunkLen) xs)
   _ | (chunk, rest) = recoverWave (average chunk) :: downSample chunkLen rest
 
 thresholdFilter : Int -> List Int16 -> List Int16
-thresholdFilter t xs = map (\v => if v > (cast t) then v else 0) xs
+thresholdFilter t xs = map (\v => if abs(v) > (cast t) then v else 0) xs
 
 writeBufToFile : String -> List Int16 -> IO ()
 writeBufToFile fpath bytes = do
