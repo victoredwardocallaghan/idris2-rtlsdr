@@ -19,7 +19,7 @@ amp i q =
     qq : Double
     qq = cast q * cast q
   in
-    -- generates amplitudes between 0.0 to 128.0
+    -- generates amplitudes between 0.0 to 128.0*sqrt(2)
     sqrt ( ii + qq )
 
 demodAM : List Int8 -> List Double
@@ -33,26 +33,26 @@ average : List Double -> Double
 average [] = 0.0
 average xs = (foldr (+) 0.0 xs) / cast (length xs)
 
--- AM original signal is shifted from (0.0, 128.0) -> approx (-32767, 32767)
-recoverWave : Double -> Int16
-recoverWave x = cast (255.0 * ( x - 64.0 ))
+-- AM original signal is shifted from approx (0.0, 181.0) -> approx (-127, 127)
+recoverWave : Double -> Bits8
+recoverWave x = cast (1.4 * ( x - 90.5 ))
 
-downSample : Int -> List Double -> List Int16
+downSample : Int -> List Double -> List Bits8
 downSample chunkLen [] = []
 downSample chunkLen xs with (splitAt (cast chunkLen) xs)
   _ | (chunk, rest) = recoverWave (average chunk) :: downSample chunkLen rest
 
-thresholdFilter : Int -> List Int16 -> List Int16
+thresholdFilter : Int -> List Bits8 -> List Bits8
 thresholdFilter t xs = map (\v => if abs(v) > (cast t) then v else 0) xs
 
-writeBufToFile : String -> List Int16 -> IO ()
+writeBufToFile : String -> List Bits8 -> IO ()
 writeBufToFile fpath bytes = do
   let len : Int = cast (length bytes)
   Just buf <- newBuffer len
     | Nothing => putStrLn "could not allocate buffer"
 
   for_ (zip [0 .. len-1] bytes) $ \(i, w) =>
-    setBits16 buf i (cast w)
+    setBits8 buf i (cast w)
 
   result <- withFile fpath Append printLn $ \f => do
     Right () <- writeBufferData f buf 0 len
