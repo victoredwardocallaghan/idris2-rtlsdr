@@ -10,8 +10,8 @@ import System.FFI
 import System.File
 import System.File.Buffer
 
-abs : (i, q : Int8) -> Int16
-abs i q =
+amp : (i, q : Int8) -> Double
+amp i q =
   let
     ii : Double
     ii = cast i * cast i
@@ -19,23 +19,28 @@ abs i q =
     qq : Double
     qq = cast q * cast q
   in
-    cast $ sqrt ( ii + qq )
+    -- generates amplitudes between 0.0 to 128.0
+    sqrt ( ii + qq )
 
-demodAM : List Int8 -> List Int16
+demodAM : List Int8 -> List Double
 demodAM [] = []
 demodAM [_] = []
 demodAM (i :: q :: rest) =
-  let w = abs i q
+  let w = amp i q
     in w :: demodAM rest
 
-average : List Int16 -> Int16
-average xs = cast {to = Int16} $
-  foldr ((+) . cast {to = Int}) 0 xs `div` cast (length xs)
+average : List Double -> Double
+average [] = 0.0
+average xs = (foldr (+) 0.0 xs) / cast (length xs)
 
-downSample : Int -> List Int16 -> List Int16
+-- AM original signal is shifted from (0.0, 128.0) -> approx (-32767, 32767)
+recoverWave : Double -> Int16
+recoverWave x = cast (255.0 * ( x - 64.0 ))
+
+downSample : Int -> List Double -> List Int16
 downSample chunkLen [] = []
 downSample chunkLen xs with (splitAt (cast chunkLen) xs)
-  _ | (chunk, rest) = average chunk :: downSample chunkLen rest
+  _ | (chunk, rest) = recoverWave (average chunk) :: downSample chunkLen rest
 
 thresholdFilter : Int -> List Int16 -> List Int16
 thresholdFilter t xs = map (\v => if v > (cast t) then v else 0) xs
