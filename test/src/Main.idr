@@ -23,7 +23,7 @@ writeBufToFile fpath bytes = do
     setBits16 buf (2*i) (cast w)
 
   result <- withFile fpath Append printLn $ \f => do
-    Right () <- writeBufferData f buf 0 len
+    Right () <- writeBufferData f buf 0 (2*len)
       | Left (err, len) => do
           printLn ("could not writeBufferData", err, len)
           pure $ Left ()
