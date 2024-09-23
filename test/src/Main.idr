@@ -59,7 +59,7 @@ testAM args = do
       putStrLn $ "Using a in rate of: " ++ (show $ rate_in `div` 1_000) ++ " kHz."
       let rate_iq = 1_008_000
       putStrLn $ "Sampling IQ stream at: " ++ (show $ rate_iq `div` 1_000) ++ "kHz."
-      let rate_downsample = (1_000_000 `div` rate_in) + 1
+      let rate_downsample = (500_000 `div` rate_in) + 1
       putStrLn $ "Calculated downsampling of: " ++ (show rate_downsample) ++ "x."
       let output_scale = (1 `shiftL` 15) `div` 128
       putStrLn $ " debug> output scaled by: " ++ show output_scale
