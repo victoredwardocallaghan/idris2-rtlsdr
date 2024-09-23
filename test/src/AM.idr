@@ -4,7 +4,7 @@ import Data.Buffer
 import Data.List
 
 -- Calculate the magnitude of the IQ vector and scale it,
--- scale is defined as S16_MAX_SZ/(128*downsample_rate).
+-- scale is defined as S16_MAX_SZ/128.
 mag : Int -> (i, q : Int16) -> Int16
 mag s i q =
   let
