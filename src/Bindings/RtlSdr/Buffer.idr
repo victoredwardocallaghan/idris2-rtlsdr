@@ -6,6 +6,7 @@ import Bindings.RtlSdr.Error
 import Bindings.RtlSdr.Raw.Support
 
 import Data.Buffer
+import Data.IOArray
 import System.FFI
 
 %default total
@@ -37,10 +38,15 @@ scaleIQ v = (cast {to = Int16} v) - 128
 toIQ : Bits8 -> Bits8 -> IQ
 toIQ i q = MkIQ (scaleIQ i) (scaleIQ q)
 
-toIQList : List Bits8 -> List IQ
-toIQList [] = []
-toIQList [_] = []
-toIQList (xs::ys::rest) = (toIQ xs ys) :: toIQList rest
+toIQList' : List Bits8 -> List IQ
+toIQList' [] = []
+toIQList' [_] = []
+toIQList' (xs::ys::rest) = (toIQ xs ys) :: toIQList' rest
+
+-- FIXME: ..
+toIQList : IOArray Bits8 -> List IQ
+toIQList _ = [] -- HACK to typecheck.
+--toIQList ioa = toIQList' $ toList ioa
 
 ||| Read samples from the device synchronously.
 |||
