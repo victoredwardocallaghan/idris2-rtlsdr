@@ -90,6 +90,12 @@ record Args where
   ppm   : Maybe Int
   rate  : Maybe Int
 
+freqStr : Int -> String
+freqStr v = case v of
+                 127350000 => "YBTH CTAF, " ++ show (v `div` 1_000) ++ "kHz."
+                 133250000 => "YBTH AWIS, " ++ show (v `div` 1_000) ++ "kHz."
+                 _ => show (v `div` 1_000) ++ "kHz."
+
 cfgRTL : Ptr RtlSdrHandle -> Int -> Int -> Int -> IO ()
 cfgRTL h fq ppm r = do
       _ <- setTunerGainMode h False -- manual gain
@@ -101,9 +107,6 @@ cfgRTL h fq ppm r = do
       _ <- setSampleRate h r
       _ <- setFreqCorrection h ppm
 
-      f <- getCenterFreq h
-      putErr $ "Freq set to: " ++ (show f)
-
       fc <- getFreqCorrection h
       putErr $ "Freq correction set to: " ++ (show fc)
 
@@ -111,8 +114,8 @@ cfgRTL h fq ppm r = do
       putErr $ "Gains: " ++ (show gs)
       g <- getTunerGain h
       putErr $ "Gain: " ++ (fromMaybe "<unknown>" $ map show $ getRight g)
-      f <- getCenterFreq h
-      putErr $ "Freq: " ++ (fromMaybe "<unknown>" $ map show $ getRight f)
+      Right f <- getCenterFreq h | Left _ => putErr "Freq: <unknown>"
+      putErr $ "Freq: " ++ (freqStr f)
       o <- getOffsetTuning h
       putErr $ "Tuner offset: " ++ (fromMaybe "<unknown>" $ map show $ getRight o)
       s <- getDirectSampling h
