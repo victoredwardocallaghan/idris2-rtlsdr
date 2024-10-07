@@ -6,6 +6,7 @@ import Bindings.RtlSdr.Error
 import Bindings.RtlSdr.Raw.Support
 
 import Data.Buffer
+import Data.IOArray
 import System.FFI
 
 %default total
@@ -87,7 +88,7 @@ export
 readAsync : Ptr RtlSdrHandle -> ReadAsyncFn -> AnyPtr -> Int -> Int -> IO (Either RTLSDR_ERROR ())
 readAsync h cbIO ctx bn bl = do
   let cbPrim = \bufPtr, bufLen, ctxPtr => toPrim $
-        cbIO ctxPtr =<< ((io_pure . toIQList) =<< readBufPtr' bufPtr bufLen)
+        cbIO ctxPtr =<< ((io_pure . toIQList . toList) =<< fromList <$> readBufPtr' bufPtr bufLen)
   r <- fromPrim $ read_async h cbPrim ctx bn bl
   io_pure $ if r == 0 then Right () else Left RtlSdrError
 
