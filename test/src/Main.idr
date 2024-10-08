@@ -94,6 +94,7 @@ freqStr : Int -> String
 freqStr v = case v of
                  127350000 => "YBTH CTAF, " ++ show (v `div` 1_000) ++ "kHz."
                  133250000 => "YBTH AWIS, " ++ show (v `div` 1_000) ++ "kHz."
+                 135250000 => "MEL CEN, " ++ show (v `div` 1_000) ++ "kHz."
                  _ => show (v `div` 1_000) ++ "kHz."
 
 decodeRTLSDRError : (Show a) => Either RTLSDR_ERROR a -> String
