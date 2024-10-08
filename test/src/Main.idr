@@ -96,6 +96,9 @@ freqStr v = case v of
                  133250000 => "YBTH AWIS, " ++ show (v `div` 1_000) ++ "kHz."
                  _ => show (v `div` 1_000) ++ "kHz."
 
+decodeRTLSDRError : (Show a) => Either RTLSDR_ERROR a -> String
+decodeRTLSDRError v = fromMaybe "<unknown>" $ map show $ getRight v
+
 cfgRTL : Ptr RtlSdrHandle -> Int -> Int -> Int -> IO ()
 cfgRTL h fq ppm r = do
       _ <- setTunerGainMode h False -- manual gain
@@ -113,13 +116,13 @@ cfgRTL h fq ppm r = do
       gs <- getTunerGains h
       putErr $ "Gains: " ++ (show gs)
       g <- getTunerGain h
-      putErr $ "Gain: " ++ (fromMaybe "<unknown>" $ map show $ getRight g)
+      putErr $ "Gain: " ++ decodeRTLSDRError g
       Right f <- getCenterFreq h | Left _ => putErr "Freq: <unknown>"
       putErr $ "Freq: " ++ (freqStr f)
       o <- getOffsetTuning h
-      putErr $ "Tuner offset: " ++ (fromMaybe "<unknown>" $ map show $ getRight o)
+      putErr $ "Tuner offset: " ++ decodeRTLSDRError o
       s <- getDirectSampling h
-      putErr $ "Sampling mode: " ++ (fromMaybe "<unknown>" $ map show $ getRight s)
+      putErr $ "Sampling mode: " ++ decodeRTLSDRError s
       r <- getSampleRate h
       putErr $ "Sample rate: " ++ (show r)
 
