@@ -71,7 +71,7 @@ setBiasTee h t = do
 ||| @g is the gpio pin to configure as a Bias T control.
 ||| @t is the toggle of `True` for Bias T on. `False` for Bias T off.
 export
-setBiasTeeGpio : Ptr RtlSdrHandle -> Int -> Bool -> IO (Either RTLSDR_ERROR ())
+setBiasTeeGpio : Ptr RtlSdrHandle -> Nat -> Bool -> IO (Either RTLSDR_ERROR ())
 setBiasTeeGpio h g t = do
-  r <- fromPrim $ set_bias_tee_gpio h g (if t == True then 1 else 0)
+  r <- fromPrim $ set_bias_tee_gpio h (cast {to = Int} g) (if t == True then 1 else 0)
   io_pure $ if r == 0 then Right () else Left RtlSdrError
