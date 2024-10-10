@@ -100,7 +100,7 @@ freqStr v = case v of
 decodeRTLSDRError : (Show a) => Either RTLSDR_ERROR a -> String
 decodeRTLSDRError v = fromMaybe "<unknown>" $ map show $ getRight v
 
-cfgRTL : Ptr RtlSdrHandle -> Int -> Int -> Int -> IO ()
+cfgRTL : Ptr RtlSdrHandle -> Int -> Int -> Nat -> IO ()
 cfgRTL h fq ppm r = do
       _ <- setTunerGainMode h False -- manual gain
       _ <- setTunerGain h (-100) -- auto
@@ -146,7 +146,7 @@ testAM args = do
       putErr $ "Using a in rate of: " ++ (show $ rate_in `div` 1_000) ++ " kHz."
       let rate_downsample = (1_000_000 `div` rate_in) + 1
       putErr $ "Calculated downsampling of: " ++ (show rate_downsample) ++ "x."
-      let rate_iq = rate_downsample * rate_in
+      let rate_iq = cast $ rate_downsample * rate_in
       putErr $ "Sampling IQ stream at: " ++ (show $ rate_iq `div` 1_000) ++ "kHz."
 
       let ppm = fromMaybe 0 args.ppm -- default ppm of zero.

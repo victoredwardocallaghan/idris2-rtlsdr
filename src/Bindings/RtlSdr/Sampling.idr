@@ -15,9 +15,9 @@ import Bindings.RtlSdr.Raw.Sampling
 ||| 		    900001 - 3200000 Hz
 ||| 		    sample loss is to be expected for rates > 2400000
 export
-setSampleRate : Ptr RtlSdrHandle -> Int -> IO (Either RTLSDR_ERROR ())
+setSampleRate : Ptr RtlSdrHandle -> Nat -> IO (Either RTLSDR_ERROR ())
 setSampleRate h r = do
-  r <- fromPrim $ set_sample_rate h r
+  r <- fromPrim $ set_sample_rate h (cast {to = Int} r)
   io_pure $ if r == 0 then Right () else Left RtlSdrInvalidRate
 
 ||| Get actual sample rate the device is configured to.
