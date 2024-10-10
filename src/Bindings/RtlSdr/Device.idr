@@ -13,11 +13,11 @@ import System.FFI
 %default total
 
 export
-rtlsdr_open : Int -> IO (Maybe (Ptr RtlSdrHandle))
+rtlsdr_open : Nat -> IO (Maybe (Ptr RtlSdrHandle))
 rtlsdr_open idx = do
   v <- prim__castPtr <$> malloc 4 -- ret
   -- const void * idris_rtlsdr_open(uint32_t index, uint32_t *ret);
-  p <- fromPrim $ idris_rtlsdr_open idx v
+  p <- fromPrim $ idris_rtlsdr_open (cast {to = Int} idx) v
   let ret = peekInt v
   free $ prim__forgetPtr v
   io_pure $ if ret == 0 then Just (prim__castPtr p) else Nothing
@@ -45,7 +45,7 @@ Show DeviceUSBStrings where
 |||
 ||| @i is the the device index
 export
-getDeviceUSBStrings : Int -> IO (Either RTLSDR_ERROR DeviceUSBStrings)
+getDeviceUSBStrings : Nat -> IO (Either RTLSDR_ERROR DeviceUSBStrings)
 getDeviceUSBStrings i = do
   -- REMARK: The C API is buggy and doesn't validate a dev is available
   -- before attempting to read strings, therefore n > 0 otherwise error.
@@ -54,7 +54,7 @@ getDeviceUSBStrings i = do
   m <- prim__castPtr <$> malloc 256
   p <- prim__castPtr <$> malloc 256
   s <- prim__castPtr <$> malloc 256
-  let r = get_device_usb_strings i m p s
+  let r = get_device_usb_strings (cast {to = Int} i) m p s
   let ds = MkDeviceUSBStrings (idris_rtlsdr_getstring m) (idris_rtlsdr_getstring p) (idris_rtlsdr_getstring s)
   -- NOTE: No use-after-free as getstring will incur a strcpy.
   free $ prim__forgetPtr m
@@ -75,7 +75,7 @@ decodeRetError e = case e of
 |||
 ||| @s is the serial string of the device
 export
-getDeviceIndexBySerial : String -> Either RTLSDR_ERROR Int
+getDeviceIndexBySerial : String -> Either RTLSDR_ERROR Nat
 getDeviceIndexBySerial s = do
   let r = get_index_by_serial s
-  if r < 0 then Left (decodeRetError r) else Right r
+  if r < 0 then Left (decodeRetError r) else Right (cast {to = Nat} r)
