@@ -25,11 +25,11 @@ decodeRetError e = case e of
 ||| @o is the offset address where the data should be read from
 ||| @l is the length of the data to read
 export
-readEEProm : Ptr RtlSdrHandle -> Int -> Int -> IO (Either RTLSDR_ERROR Buffer)
+readEEProm : Ptr RtlSdrHandle -> Nat -> Int -> IO (Either RTLSDR_ERROR Buffer)
 readEEProm h o l = do
   Just buf <- newBuffer l
     | Nothing => io_pure $ Left RtlSdrError
-  r <- fromPrim $ read_eeprom h buf o l
+  r <- fromPrim $ read_eeprom h buf (cast {to = Int} o) l
   io_pure $ if r < 0 then Left (decodeRetError r) else Right buf
 
 
@@ -39,8 +39,8 @@ readEEProm h o l = do
 ||| @b is the buffer of data to be written
 ||| @o is the offset address where the data should be written to
 export
-writeEEProm : Ptr RtlSdrHandle -> Buffer -> Int -> IO (Either RTLSDR_ERROR ())
+writeEEProm : Ptr RtlSdrHandle -> Buffer -> Nat -> IO (Either RTLSDR_ERROR ())
 writeEEProm h b o = do
   len <- rawSize b
-  r <- fromPrim $ write_eeprom h b o len
+  r <- fromPrim $ write_eeprom h b (cast {to = Int} o) len
   io_pure $ if r < 0 then Left (decodeRetError r) else Right ()
