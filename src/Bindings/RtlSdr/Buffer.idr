@@ -10,17 +10,6 @@ import System.FFI
 
 %default total
 
-||| Reset internal Hardware FIFO.
-|||
-||| See section 11.4.2; USB_EPA_CTL in datasheet.
-|||
-||| @h is the device handle
-export
-resetBuffer : Ptr RtlSdrHandle -> IO (Either RTLSDR_ERROR ())
-resetBuffer h = do
-  r <- fromPrim $ reset_buffer h
-  io_pure $ if r == 0 then Right () else Left RtlSdrError
-
 ||| A IQ record contains the cartesian plane coordinates upon
 ||| the circle at a given time `t`. Both `(i, q)` are encoded
 ||| as `(Int16, Int16)` for a given sample.
@@ -98,4 +87,15 @@ export
 cancelAsync : Ptr RtlSdrHandle -> IO (Either RTLSDR_ERROR ())
 cancelAsync h = do
   r <- fromPrim $ cancel_async h
+  io_pure $ if r == 0 then Right () else Left RtlSdrError
+
+||| Reset internal Hardware FIFO.
+|||
+||| See section 11.4.2; USB_EPA_CTL in datasheet.
+|||
+||| @h is the device handle
+export
+resetBuffer : Ptr RtlSdrHandle -> IO (Either RTLSDR_ERROR ())
+resetBuffer h = do
+  r <- fromPrim $ reset_buffer h
   io_pure $ if r == 0 then Right () else Left RtlSdrError

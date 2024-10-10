@@ -6,11 +6,6 @@ import Data.Buffer
 
 %default total
 
--- RTLSDR_API int rtlsdr_reset_buffer(rtlsdr_dev_t *dev);
-export
-%foreign (librtlsdr "reset_buffer")
-reset_buffer: Ptr RtlSdrHandle -> PrimIO Int
-
 -- RTLSDR_API int rtlsdr_read_sync(rtlsdr_dev_t *dev, void *buf, int len, int *n_read);
 export
 %foreign (librtlsdr "read_sync")
@@ -28,3 +23,8 @@ read_async: Ptr RtlSdrHandle -> ReadAsyncFnPrim -> AnyPtr -> Int -> Int -> PrimI
 export
 %foreign (librtlsdr "cancel_async")
 cancel_async: Ptr RtlSdrHandle -> PrimIO Int
+
+-- RTLSDR_API int rtlsdr_reset_buffer(rtlsdr_dev_t *dev);
+export
+%foreign (librtlsdr "reset_buffer")
+reset_buffer: Ptr RtlSdrHandle -> PrimIO Int
