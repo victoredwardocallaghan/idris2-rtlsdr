@@ -90,7 +90,7 @@ record Args where
   ppm   : Maybe Int
   rate  : Maybe Int
 
-freqStr : Int -> String
+freqStr : Nat -> String
 freqStr v = case v of
                  127350000 => "YBTH CTAF, " ++ show (v `div` 1_000) ++ "kHz."
                  133250000 => "YBTH AWIS, " ++ show (v `div` 1_000) ++ "kHz."
@@ -100,7 +100,7 @@ freqStr v = case v of
 decodeRTLSDRError : (Show a) => Either RTLSDR_ERROR a -> String
 decodeRTLSDRError v = fromMaybe "<unknown>" $ map show $ getRight v
 
-cfgRTL : Ptr RtlSdrHandle -> Int -> Int -> Nat -> IO ()
+cfgRTL : Ptr RtlSdrHandle -> Nat -> Int -> Nat -> IO ()
 cfgRTL h fq ppm r = do
       _ <- setTunerGainMode h False -- manual gain
       _ <- setTunerGain h (-100) -- auto

@@ -52,19 +52,19 @@ getXTALFreq h = do
 ||| @h is the device handle
 ||| @f is the frequency in Hz
 export
-setCenterFreq : Ptr RtlSdrHandle -> Int -> IO (Either RTLSDR_ERROR ())
+setCenterFreq : Ptr RtlSdrHandle -> Nat -> IO (Either RTLSDR_ERROR ())
 setCenterFreq h f = do
-  r <- fromPrim $ set_center_freq h f
+  r <- fromPrim $ set_center_freq h (cast {to=Int} f)
   io_pure $ if r == 0 then Right () else Left RtlSdrInvalidFreq
 
 ||| Get actual frequency the device is tuned to.
 |||
 ||| @h is the device handle
 export
-getCenterFreq : Ptr RtlSdrHandle -> IO (Either RTLSDR_ERROR Int)
+getCenterFreq : Ptr RtlSdrHandle -> IO (Either RTLSDR_ERROR Nat)
 getCenterFreq h = do
   r <- fromPrim $ get_center_freq h
-  io_pure $ if r == 0 then Left RtlSdrError else Right r
+  io_pure $ if r == 0 then Left RtlSdrError else Right (cast {to=Nat} r)
 
 ||| Set the frequency correction value for the device.
 |||
